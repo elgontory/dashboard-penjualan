@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+from io import BytesIO
 from statsmodels.tsa.arima.model import ARIMA
 
 # Upload File Excel
@@ -11,7 +12,6 @@ uploaded_file = st.sidebar.file_uploader("Pilih file Excel", type=['xlsx'])
 if uploaded_file:
     data = pd.read_excel(uploaded_file)
 else:
-    # Default jika tidak ada upload
     data = pd.read_excel('data_penjualan_3bulan.xlsx')
 
 # Konversi tanggal ke datetime
@@ -66,3 +66,36 @@ for product in product_filter:
 
 ax.legend()
 st.pyplot(fig)
+
+# ===========================
+# DOWNLOAD LAPORAN (PDF/Excel)
+# ===========================
+
+def download_excel():
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        filtered_data.to_excel(writer, sheet_name='Data Penjualan')
+    processed_data = output.getvalue()
+    return processed_data
+
+st.sidebar.subheader("Download Laporan")
+download_format = st.sidebar.radio("Pilih format laporan:", ('Excel', 'PDF'))
+
+if st.sidebar.button("Download"):
+    if download_format == 'Excel':
+        st.sidebar.download_button(
+            label="Download Excel",
+            data=download_excel(),
+            file_name="laporan_penjualan.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+    else:
+        buffer = BytesIO()
+        plt.savefig(buffer, format='pdf')
+        buffer.seek(0)
+        st.sidebar.download_button(
+            label="Download PDF",
+            data=buffer,
+            file_name="laporan_penjualan.pdf",
+            mime="application/pdf"
+        )
