@@ -45,7 +45,12 @@ for product in product_filter:
 ax.set_xlabel("Tanggal")
 ax.set_ylabel("Jumlah Penjualan")
 ax.legend()
+
+# Rotasi Label Tanggal
+plt.xticks(rotation=90)
+
 st.pyplot(fig)
+
 
 # Prediksi Moving Average & ARIMA
 st.subheader("Prediksi Penjualan (Moving Average dan ARIMA)")
